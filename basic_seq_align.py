@@ -67,8 +67,7 @@ def basic_seq_align(X, Y, gap_pen):
     
     for i in range(1, m):
         for j in range(1, n):
-            # in ith row and jth column, to access the ith character of X (or jth character of Y), we must access X[i-1] ( or Y[j-1]) because string access is by zero-index, and we
-            # reserved the 0th row/col for "" and ""
+            # string is indexed by zerp; to access ith character, subtract i-1
             OPT[i][j] = min((OPT(i-1, j-1) + MISMATCH(X[i-1], Y[j-1])),     
                             (OPT(i-1, j) + gap_pen), (OPT(i, j-1) + gap_pen))
     
