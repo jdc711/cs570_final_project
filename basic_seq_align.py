@@ -47,6 +47,7 @@ def MISMATCH(x, y):
 
 
 def basic_seq_align(X, Y, gap_pen):
+    
     m = len(X)
     n = len(Y)
     # define 2d list OPT
@@ -56,16 +57,20 @@ def basic_seq_align(X, Y, gap_pen):
         OPT.append(col)
 
     # initialize necessary locations of OPT array
+    # special note! in OPT grid, we reserve 0th row/col for "" and ""; the 1st row/col for "x1" and "y1"; the 2nd row/col for "x1x2" and "y1y2"
     for i in range(m):
         OPT[i][0] = i*gap_pen
     for j in range(n):
         OPT[0][j] = j*gap_pen
 
-    # compute value of OPT solution BOTTOM UP; optimal value will be found at OPT[m][n]
+    # compute value of OPT solution BOTTOM UP; optimal value will be found at OPT[m][n] 
+    
     for i in range(1, m):
         for j in range(1, n):
-            OPT[m][n] = min((OPT(m-1, n-1) + MISMATCH(X[m], Y[n])),
-                            (OPT(m-1, n) + gap_pen), (OPT(m, n-1) + gap_pen))
+            # in ith row and jth column, to access the ith character of X (or jth character of Y), we must access X[i-1] ( or Y[j-1]) because string access is by zero-index, and we
+            # reserved the 0th row/col for "" and ""
+            OPT[i][j] = min((OPT(i-1, j-1) + MISMATCH(X[i-1], Y[j-1])),     
+                            (OPT(i-1, j) + gap_pen), (OPT(i, j-1) + gap_pen))
     
     # Build optimal solution TOP DOWN
     i = m
