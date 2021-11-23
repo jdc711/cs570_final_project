@@ -87,7 +87,7 @@ def basic_seq_align(X, Y, gap_pen):
             # Yj is mismatched with gap, append gap to end of Y_sol
             Y_sol = Y_sol + '_'
             j = j - 1
-        elif OPT[i][j] == OPT[i-1][j-1]:
+        elif OPT[i][j] == OPT[i-1][j-1] + MISMATCH(X[i-1],Y[j-1]):
             # (Xi,Yj) is in our optimal solution; append Xi to X_sol and Yj to Y_sol
             X_sol = X_sol + X[i]
             Y_sol = Y_sol + Y[j]
