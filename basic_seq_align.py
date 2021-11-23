@@ -80,12 +80,14 @@ def basic_seq_align(X, Y, gap_pen):
     while (i >= 0 and j >= 0):
         # compare OPT[i][j] with 1) OPT[i-1][j] (if Xm is mismatched), 2) OPT[i][j-1] (if Yn is mismatched), 3) OPT[i-1][j-1] (if (Xm,Yn) is in our optimal solution
         if OPT[i][j] == OPT[i-1][j] + gap_pen:
-            # Xi is mismatched with gap, append gap to end of X_sol
-            X_sol = X_sol + '_'
+            # Xi is mismatched with gap, append gap to end of Y_sol and Xi to end of X_sol
+            X_sol = X_sol + X[i]
+            Y_sol = Y_sol + '_'
             i = i - 1
         elif OPT[i][j] == OPT[i][j-1] + gap_pen:
-            # Yj is mismatched with gap, append gap to end of Y_sol
-            Y_sol = Y_sol + '_'
+            # Yj is mismatched with gap, append gap to end of X_sol and Yj to end of Y_sol
+            Y_sol = Y_sol + Y[j]
+            X_sol = X_sol + '_'
             j = j - 1
         elif OPT[i][j] == OPT[i-1][j-1] + MISMATCH(X[i-1],Y[j-1]):
             # (Xi,Yj) is in our optimal solution; append Xi to X_sol and Yj to Y_sol
