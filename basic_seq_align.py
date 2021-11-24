@@ -123,4 +123,85 @@ def basic_seq_align(X, Y, gap_pen):
 if __name__ == "__main__":
     basic_seq_align("hello", "hey", 3)
     
-        
+import random
+
+def generate_sequence(desired_size, end):
+  random.seed(1)
+  # Get the state of the generator
+  state = random.getstate()
+  output = []
+  for i in range(desired_size):
+      output.append(random.randint(1, end))
+  #print(output)
+  return output
+
+def generate_string(original_string, array):
+  output = original_string
+  for index in array:
+    output = output[:index+1] + output + output[index + 1:]
+  return output
+
+
+#test case 1
+a1 = "ACTG"
+arr1_1 = [3,6,1]
+b1 = "TACG"
+arr2_1= [1,2,9]
+
+#test case 2
+a2 = "ACTG"
+arr1_2 = [3,6,1,1]
+b2 = "TACG"
+arr2_2= [1,2,9,2]
+
+#test case 3
+a3 = "ACTG"
+arr1 = [3,6,1,1]
+b3 = "TACG"
+arr2= [1,2]
+
+#test case 4
+a4 = "ACTG"
+arr1_4 = generate_sequence(3,5)
+b4 = "ATCG"
+arr2_4= generate_sequence(3,6)
+
+#test case 5
+a5 = "ACTG"
+arr1_5 = generate_sequence(3,5)
+b5 = "GGGG"
+arr2_5= generate_sequence(3,4)
+
+#test case 6
+a6 = "ACTG"
+arr1_6 = generate_sequence(3,5)
+b6 = "TTTT"
+arr2_6 = generate_sequence(2,5)
+
+#test case 7
+a7 = "ACTG"
+arr1_7 = generate_sequence(3,5)
+b7 = "TACG"
+arr2_7= generate_sequence(3,4)
+
+#test case 8
+a8 = "ACTG"
+arr1_8 = generate_sequence(3,5)
+b3 = "TACG"
+arr2_8 = generate_sequence(1,3)
+
+#test case 9
+a9 = "ACTG"
+arr1_9 = generate_sequence(3,5)
+b9 = "CCCC"
+arr2_9 = generate_sequence(2,2)
+
+#test case 10
+a10 = "ACTG"
+arr1_10 = generate_sequence(3,5)
+b10 = "TACG"
+arr2_10 = generate_sequence(3,5)
+
+s1 = generate_string(a2,arr1_2)
+s2 = generate_string(b2,arr2_2)
+print(s1,s2)        
