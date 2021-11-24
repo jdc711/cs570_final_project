@@ -42,180 +42,80 @@
 # We will go left to right, computing row by row starting from the bottom row
 
 
-from pandas import *
-
 
 def MISMATCH(x, y):
-    Dict = { 'A': {'A': 0, 'C': 110,'G':48, 'T':94},
-             'C': {'A': 110, 'C': 0,'G':118, 'T':48},
-             'G': {'A': 48, 'C': 118,'G':0, 'T':110},
-             'T': {'A': 94, 'C': 48,'G':110, 'T':0}}
-    return Dict[x][y]     
+    return 2
+
+
 
 def basic_seq_align(X, Y, gap_pen):
+    
     m = len(X)
     n = len(Y)
     # define 2d list OPT
-    OPT = [[0 for x in range(n)] for y in range(m)] 
-
-    # initialize necessary locations of OPT array
-    for i in range(m):
-        OPT[i][0] = i*gap_pen
-    for j in range(n):
-        OPT[0][j] = j*gap_pen
+    OPT = []
+    for i in range(m+1):
+        OPT.append([])
+        for j in range(n+1):
+            OPT[i].append(0) 
+    print(OPT)
     
-
-    # compute value of OPT solution BOTTOM UP; optimal value will be found at OPT[m][n]
-    for i in range(1, m):
-        for j in range(1, n):
-          a = OPT[i-1][j-1] + MISMATCH(X[i-1], Y[j-1])
-          b = OPT[i-1][j] + gap_pen
-          c = OPT[i][j-1] + gap_pen
-          OPT[i][j] = min(a,b,c)           
-    print(DataFrame(OPT))
-    return OPT
+    # initialize necessary locations of OPT array
+    # special note! in OPT grid, we reserve 0th row/col for "" and ""; the 1st row/col for "x1" and "y1"; the 2nd row/col for "x1x2" and "y1y2"
+    for i in range(0,m+1):
+        print(i)
+        OPT[i][0] = i*gap_pen
         
+        
+    for j in range(0,n+1):
+        OPT[0][j] = j*gap_pen
 
-
-
-
-
-def solution(X,Y,gap_pen,OPT):
-    i = len(X)-1
-    j = len(Y)-1
+    # compute value of OPT solution BOTTOM UP; optimal value will be found at OPT[m][n] 
+    
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            # string is indexed by zerp; to access ith character, subtract i-1
+            OPT[i][j] = min((OPT[i-1][j-1] + MISMATCH(X[i-1], Y[j-1])),     
+                            (OPT[i-1][j] + gap_pen), (OPT[i][j-1] + gap_pen))
+    
+    # Build optimal solution TOP DOWN
+    i = m
+    j = n
     
     X_sol = ""
     Y_sol = ""
 
+
+    
+    
     while (i > 0 and j > 0):
         # compare OPT[i][j] with 1) OPT[i-1][j] (if Xm is mismatched), 2) OPT[i][j-1] (if Yn is mismatched), 3) OPT[i-1][j-1] (if (Xm,Yn) is in our optimal solution
         if OPT[i][j] == OPT[i-1][j] + gap_pen:
             # Xi is mismatched with gap, append gap to end of Y_sol and Xi to end of X_sol
-            X_sol = X_sol + X[i]
-            Y_sol = Y_sol + '_'
+            X_sol = X[i-1] + X_sol
+            Y_sol = '_' + Y_sol
             i = i - 1
+            print("X: ", X_sol)
+            print("Y: ", Y_sol)
         elif OPT[i][j] == OPT[i][j-1] + gap_pen:
             # Yj is mismatched with gap, append gap to end of X_sol and Yj to end of Y_sol
-            Y_sol = Y_sol + Y[j]
-            X_sol = X_sol + '_'
+            Y_sol = Y[j-1] + Y_sol  
+            X_sol = '_' + X_sol 
             j = j - 1
+            print("X: ", X_sol)
+            print("Y: ", Y_sol)
         elif OPT[i][j] == OPT[i-1][j-1] + MISMATCH(X[i-1],Y[j-1]):
             # (Xi,Yj) is in our optimal solution; append Xi to X_sol and Yj to Y_sol
-            X_sol = X_sol + X[i]
-            Y_sol = Y_sol + Y[j]
+            X_sol =  X[i-1]+ X_sol 
+            Y_sol = Y[j-1] + Y_sol 
             i = i - 1
             j = j - 1
+            print("X: ", X_sol)
+            print("Y: ", Y_sol)
+    print("X: ", X_sol)
+    print("Y: ", Y_sol)
+        
+if __name__ == "__main__":
+    basic_seq_align("", "hey", 3)
     
-    return X_sol,Y_sol
-
-
-
-
-
-
-
-
-
-
-
-
-
-X = "ACACACTGACTACTGACTGGTGACTACTGACTGGACTGACTACTGACTGGTGACTACTGACTGG"
-Y = "TATTATTATACGCTATTATACGCGACGCGGACGCGTATACGCTATTATACGCGACGCGGACGCG"    
-gap_pen = 30
-OPT = basic_seq_align(X,Y,gap_pen)
-output = solution(X,Y,gap_pen,OPT)
-print(output)
-
-
-
-
-
-
-
-
-
-
-#TEST CASES GENERATOR 
-import random
-
-def generate_sequence(desired_size, end):
-  random.seed(1)
-  # Get the state of the generator
-  state = random.getstate()
-  output = []
-  for i in range(desired_size):
-      output.append(random.randint(1, end))
-  #print(output)
-  return output
-
-def generate_string(original_string, array):
-  output = original_string
-  for index in array:
-    output = output[:index+1] + output + output[index + 1:]
-  return output
-
-
-#test case 1
-a1 = "ACTG"
-arr1_1 = [3,6,1]
-b1 = "TACG"
-arr2_1= [1,2,9]
-
-#test case 2
-a2 = "ACTG"
-arr1_2 = [3,6,1,1]
-b2 = "TACG"
-arr2_2= [1,2,9,2]
-
-#test case 3
-a3 = "ACTG"
-arr1 = [3,6,1,1]
-b3 = "TACG"
-arr2= [1,2]
-
-#test case 4
-a4 = "ACTG"
-arr1_4 = generate_sequence(3,5)
-b4 = "ATCG"
-arr2_4= generate_sequence(3,6)
-
-#test case 5
-a5 = "ACTG"
-arr1_5 = generate_sequence(3,5)
-b5 = "GGGG"
-arr2_5= generate_sequence(3,4)
-
-#test case 6
-a6 = "ACTG"
-arr1_6 = generate_sequence(3,5)
-b6 = "TTTT"
-arr2_6 = generate_sequence(2,5)
-
-#test case 7
-a7 = "ACTG"
-arr1_7 = generate_sequence(3,5)
-b7 = "TACG"
-arr2_7= generate_sequence(3,4)
-
-#test case 8
-a8 = "ACTG"
-arr1_8 = generate_sequence(3,5)
-b3 = "TACG"
-arr2_8 = generate_sequence(1,3)
-
-#test case 9
-a9 = "ACTG"
-arr1_9 = generate_sequence(3,5)
-b9 = "CCCC"
-arr2_9 = generate_sequence(2,2)
-
-#test case 10
-a10 = "ACTG"
-arr1_10 = generate_sequence(3,5)
-b10 = "TACG"
-arr2_10 = generate_sequence(3,5)
-
-s1 = generate_string(a2,arr1_2)
-s2 = generate_string(b2,arr2_2)
-print(s1,s2)        
+        
