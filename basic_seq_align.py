@@ -42,10 +42,15 @@
 # We will go left to right, computing row by row starting from the bottom row
 
 
+from pandas import *
+
 
 def MISMATCH(x, y):
-    return 2
-
+    Dict = { 'A': {'A': 0, 'C': 110,'G':48, 'T':94},
+             'C': {'A': 110, 'C': 0,'G':118, 'T':48},
+             'G': {'A': 48, 'C': 118,'G':0, 'T':110},
+             'T': {'A': 94, 'C': 48,'G':110, 'T':0}}
+    return Dict[x][y]     
 
 
 def basic_seq_align(X, Y, gap_pen):
