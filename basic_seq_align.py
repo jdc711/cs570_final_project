@@ -42,9 +42,12 @@
 # We will go left to right, computing row by row starting from the bottom row
 
 
-
 def MISMATCH(x, y):
-    return 2
+    Dict = { 'A': {'A': 0, 'C': 110,'G':48, 'T':94},
+             'C': {'A': 110, 'C': 0,'G':118, 'T':48},
+             'G': {'A': 48, 'C': 118,'G':0, 'T':110},
+              'T': {'A': 94, 'C': 48,'G':110, 'T':0}}
+    return Dict[x][y] 
 
 
 
@@ -95,27 +98,31 @@ def basic_seq_align(X, Y, gap_pen):
             X_sol = X[i-1] + X_sol
             Y_sol = '_' + Y_sol
             i = i - 1
-            print("X: ", X_sol)
-            print("Y: ", Y_sol)
+            # print("X: ", X_sol)
+            # print("Y: ", Y_sol)
         elif OPT[i][j] == OPT[i][j-1] + gap_pen:
             # Yj is mismatched with gap, append gap to end of X_sol and Yj to end of Y_sol
             Y_sol = Y[j-1] + Y_sol  
             X_sol = '_' + X_sol 
             j = j - 1
-            print("X: ", X_sol)
-            print("Y: ", Y_sol)
+            # print("X: ", X_sol)
+            # print("Y: ", Y_sol)
         elif OPT[i][j] == OPT[i-1][j-1] + MISMATCH(X[i-1],Y[j-1]):
             # (Xi,Yj) is in our optimal solution; append Xi to X_sol and Yj to Y_sol
             X_sol =  X[i-1]+ X_sol 
             Y_sol = Y[j-1] + Y_sol 
             i = i - 1
             j = j - 1
-            print("X: ", X_sol)
-            print("Y: ", Y_sol)
+            # print("X: ", X_sol)
+            # print("Y: ", Y_sol)
     print("X: ", X_sol)
     print("Y: ", Y_sol)
         
 if __name__ == "__main__":
-    basic_seq_align("", "hey", 3)
+    X = "ACACACTGACTACTGACTGGTGACTACTGACTGGACTGACTACTGACTGGTGACTACTGACTGG"
+    Y = "TATTATTATACGCTATTATACGCGACGCGGACGCGTATACGCTATTATACGCGACGCGGACGCG"    
+    gap_pen = 30
+    basic_seq_align(X,Y,gap_pen)
+    
     
         
