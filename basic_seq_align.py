@@ -43,16 +43,26 @@
 
 
 def MISMATCH(x, y):
-    Dict = { 'A': {'A': 0, 'C': 110,'G':48, 'T':94},
-             'C': {'A': 110, 'C': 0,'G':118, 'T':48},
-             'G': {'A': 48, 'C': 118,'G':0, 'T':110},
-              'T': {'A': 94, 'C': 48,'G':110, 'T':0}}
-    return Dict[x][y] 
+    Dict = {'A': {'A': 0, 'C': 110, 'G': 48, 'T': 94},
+            'C': {'A': 110, 'C': 0, 'G': 118, 'T': 48},
+            'G': {'A': 48, 'C': 118, 'G': 0, 'T': 110},
+            'T': {'A': 94, 'C': 48, 'G': 110, 'T': 0}}
+    return Dict[x][y]
 
 
+def checkMinAlign(X, Y, gap_pen):
+    i = len(X)
+    cost = 0
+    while (i > 0):
+        if (X[i-1] == '_' or Y[i-1] == '_'):
+            cost = cost + gap_pen
+        else:
+            cost = cost + MISMATCH(X[i-1], Y[i-1])
+        i = i - 1
+    return cost       
 
 def basic_seq_align(X, Y, gap_pen):
-    
+
     m = len(X)
     n = len(Y)
     # define 2d list OPT
@@ -60,37 +70,31 @@ def basic_seq_align(X, Y, gap_pen):
     for i in range(m+1):
         OPT.append([])
         for j in range(n+1):
-            OPT[i].append(0) 
-    print(OPT)
-    
+            OPT[i].append(0)
+   
     # initialize necessary locations of OPT array
     # special note! in OPT grid, we reserve 0th row/col for "" and ""; the 1st row/col for "x1" and "y1"; the 2nd row/col for "x1x2" and "y1y2"
-    for i in range(0,m+1):
-        print(i)
+    for i in range(0, m+1):
         OPT[i][0] = i*gap_pen
-        
-        
-    for j in range(0,n+1):
+
+    for j in range(0, n+1):
         OPT[0][j] = j*gap_pen
 
-    # compute value of OPT solution BOTTOM UP; optimal value will be found at OPT[m][n] 
-    
-    for i in range(1, m+1):
-        for j in range(1, n+1):
+    # compute value of OPT solution BOTTOM UP; optimal value will be found at OPT[m][n]
+
+    for i in range(1, m+1): # 1 to m
+        for j in range(1, n+1): # 1 to n 
             # string is indexed by zerp; to access ith character, subtract i-1
-            OPT[i][j] = min((OPT[i-1][j-1] + MISMATCH(X[i-1], Y[j-1])),     
+            OPT[i][j] = min((OPT[i-1][j-1] + MISMATCH(X[i-1], Y[j-1])),
                             (OPT[i-1][j] + gap_pen), (OPT[i][j-1] + gap_pen))
-    
+
     # Build optimal solution TOP DOWN
     i = m
     j = n
-    
+
     X_sol = ""
     Y_sol = ""
 
-
-    
-    
     while (i > 0 and j > 0):
         # compare OPT[i][j] with 1) OPT[i-1][j] (if Xm is mismatched), 2) OPT[i][j-1] (if Yn is mismatched), 3) OPT[i-1][j-1] (if (Xm,Yn) is in our optimal solution
         if OPT[i][j] == OPT[i-1][j] + gap_pen:
@@ -102,27 +106,47 @@ def basic_seq_align(X, Y, gap_pen):
             # print("Y: ", Y_sol)
         elif OPT[i][j] == OPT[i][j-1] + gap_pen:
             # Yj is mismatched with gap, append gap to end of X_sol and Yj to end of Y_sol
-            Y_sol = Y[j-1] + Y_sol  
-            X_sol = '_' + X_sol 
+            Y_sol = Y[j-1] + Y_sol
+            X_sol = '_' + X_sol
             j = j - 1
             # print("X: ", X_sol)
             # print("Y: ", Y_sol)
-        elif OPT[i][j] == OPT[i-1][j-1] + MISMATCH(X[i-1],Y[j-1]):
+        elif OPT[i][j] == OPT[i-1][j-1] + MISMATCH(X[i-1], Y[j-1]):
             # (Xi,Yj) is in our optimal solution; append Xi to X_sol and Yj to Y_sol
-            X_sol =  X[i-1]+ X_sol 
-            Y_sol = Y[j-1] + Y_sol 
+            X_sol = X[i-1] + X_sol
+            Y_sol = Y[j-1] + Y_sol
             i = i - 1
             j = j - 1
             # print("X: ", X_sol)
             # print("Y: ", Y_sol)
+    
+    while (i > 0):
+        X_sol = X[i-1] + X_sol
+        Y_sol = '_' + Y_sol
+        i = i - 1
+    while (j > 0):
+        Y_sol = Y[j-1] + Y_sol
+        X_sol = '_' + X_sol
+        j = j - 1
+    
+    
+    
     print("X: ", X_sol)
     print("Y: ", Y_sol)
-        
+    return X_sol, Y_sol
+    
+    
+
+
+
+
 if __name__ == "__main__":
+
     X = "ACACACTGACTACTGACTGGTGACTACTGACTGGACTGACTACTGACTGGTGACTACTGACTGG"
-    Y = "TATTATTATACGCTATTATACGCGACGCGGACGCGTATACGCTATTATACGCGACGCGGACGCG"    
+    Y = "TATTATACGCGACGCG"
+    
+
     gap_pen = 30
-    basic_seq_align(X,Y,gap_pen)
-    
-    
-        
+ 
+    X_sol, Y_sol = basic_seq_align(X, Y, gap_pen)
+    print("cost of alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
