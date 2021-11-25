@@ -1,4 +1,5 @@
-
+import time
+from guppy import hpy
 
 # Define meaning of OPT solution:
 # OPT solution is the minimum cost alignment of 2 strings: X = "X1X2X3...Xm" and Y = "Y1Y2Y3...Yn"
@@ -161,18 +162,35 @@ def basic_seq_align(X, Y, gap_pen):
 
 def main():
 
+    hp = hpy()
+    hp.setrelheap()
     inputSeq = parseInputfile("input1.txt")
     print(inputSeq[0])
     print(inputSeq[1])
-    X="ACACACTGACTACTGACTGGTGACTACTGACTGGACTGACTACTGACTGGTGACTACTGACTGG"
 
-    Y="TATTATTATACGCTATTATACGCGACGCGGACGCGTATACGCTATTATACGCGACGCGGACGCG"
+    X = inputSeq[0]
+    Y = inputSeq[1]
+    #X="ACACACTGACTACTGACTGGTGACTACTGACTGGACTGACTACTGACTGGTGACTACTGACTGG"
+
+    #Y="TATTATTATACGCTATTATACGCGACGCGGACGCGTATACGCTATTATACGCGACGCGGACGCG"
     
 
     gap_pen = 30
- 
+    
+    #start timer and memory 
+    t0 = time.time()
     X_sol, Y_sol = basic_seq_align(X, Y, gap_pen)
+    t1 = time.time()
+    totalTime = t1-t0
+    identity_set = hp.heap()
+    stats = identity_set.stat
+    print("Index Count  Size    Cumulative Size             Object Name")
+    for row in stats.get_rows():
+        print("%5d %5d %8d %8d %30s"%(row.index, row.count, row.size, row.cumulsize, row.name))
+    
+    print("total time ", totalTime, " seconds")
     print("cost of alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
+
 
 
 if __name__ == "__main__":
