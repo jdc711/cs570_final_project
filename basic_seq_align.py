@@ -41,6 +41,28 @@
 
 # We will go left to right, computing row by row starting from the bottom row
 
+def parseInputfile(fileName):
+    with open(fileName) as f:
+        lines = f.read().splitlines()
+    f.close()
+
+    X = ""
+    Y = ""
+    baseSeq = ""
+    for i in lines:
+        if i.isnumeric():
+            first = baseSeq[:int(i) + 1]
+            second = baseSeq[int(i) + 1:]
+            baseSeq = first + baseSeq + second
+        else: #this is the base sequence
+            if baseSeq != "":
+                #print(baseSeq)
+                X = baseSeq
+            baseSeq = i
+
+    Y = baseSeq
+    return X, Y
+
 
 def MISMATCH(x, y):
     Dict = {'A': {'A': 0, 'C': 110, 'G': 48, 'T': 94},
@@ -137,12 +159,11 @@ def basic_seq_align(X, Y, gap_pen):
     
     
 
+def main():
 
-
-
-if __name__ == "__main__":
-
-   
+    inputSeq = parseInputfile("input1.txt")
+    print(inputSeq[0])
+    print(inputSeq[1])
     X="ACACACTGACTACTGACTGGTGACTACTGACTGGACTGACTACTGACTGGTGACTACTGACTGG"
 
     Y="TATTATTATACGCTATTATACGCGACGCGGACGCGTATACGCTATTATACGCGACGCGGACGCG"
@@ -152,3 +173,9 @@ if __name__ == "__main__":
  
     X_sol, Y_sol = basic_seq_align(X, Y, gap_pen)
     print("cost of alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
+
+
+if __name__ == "__main__":
+
+    main()
+   
