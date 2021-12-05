@@ -1,5 +1,5 @@
 import time
-from guppy import hpy
+import tracemalloc
 
 # Define meaning of OPT solution:
 # OPT solution is the minimum cost alignment of 2 strings: X = "X1X2X3...Xm" and Y = "Y1Y2Y3...Yn"
@@ -163,14 +163,16 @@ def basic_seq_align(X, Y, gap_pen):
 def main():
 
     t0 = time.time()
-    hp = hpy()
-    hp.setrelheap()
+    tracemalloc.start()
+
     inputSeq = parseInputfile("input2.txt")
     print(inputSeq[0])
     print(inputSeq[1])
 
     X = inputSeq[0]
     Y = inputSeq[1]
+
+    
     #X="ACACACTGACTACTGACTGGTGACTACTGACTGGACTGACTACTGACTGGTGACTACTGACTGG"
 
     #Y="TATTATTATACGCTATTATACGCGACGCGGACGCGTATACGCTATTATACGCGACGCGGACGCG"
@@ -182,13 +184,14 @@ def main():
     X_sol, Y_sol = basic_seq_align(X, Y, gap_pen)
     t1 = time.time()
     totalTime = t1-t0
+    snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
 
-    identity_set = hp.heap()
-    stats = identity_set.stat
-    print("Index Count  Size    Cumulative Size             Object Name")
-    for row in stats.get_rows():
-        print("%5d %5d %8d %8d %30s"%(row.index, row.count, row.size, row.cumulsize, row.name))
-    
+    total = 0
+    for stat in top_stats:
+        print(stat)
+        total += stat.size
+    print(total)
     print("total time ", totalTime, " seconds")
     print("cost of alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
 
