@@ -162,9 +162,10 @@ def basic_seq_align(X, Y, gap_pen):
 
 def main():
 
+    t0 = time.time()
     hp = hpy()
     hp.setrelheap()
-    inputSeq = parseInputfile("input1.txt")
+    inputSeq = parseInputfile("input2.txt")
     print(inputSeq[0])
     print(inputSeq[1])
 
@@ -178,10 +179,10 @@ def main():
     gap_pen = 30
     
     #start timer and memory 
-    t0 = time.time()
     X_sol, Y_sol = basic_seq_align(X, Y, gap_pen)
     t1 = time.time()
     totalTime = t1-t0
+
     identity_set = hp.heap()
     stats = identity_set.stat
     print("Index Count  Size    Cumulative Size             Object Name")
