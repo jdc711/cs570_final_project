@@ -91,51 +91,40 @@ def find_opt_Y_split(X, Y, gap_pen):
 
     m = len(X)
     n = len(Y)
-    print("here:",X)
-    print("here:", Y)
+    print("X in OPT SPLIT:",X)
+    print("Finding OPT SPLIT For Y:", Y)
+    
     # define 2d list OPT
     OPT = []
-    # DOULE CHECK: INITIALZIED SMALL 2D GRID (2 by m+1)
+    # DOUBLE CHECK: INITIALZIED SMALL 2D GRID (2 by n+1)
     for i in range(2):
         OPT.append([])
         for j in range(n+1):
             OPT[i].append(0)
 
     # initialize necessary locations of OPT array
-    # special note! in OPT grid, we reserve 0th row/col for "" and ""; the 1st row/col for "x1" and "y1"; the 2nd row/col for "x1x2" and "y1y2"
+    # special note! in OPT grid, we reserve 0th row/col for "" and ""; the 1st row/col for "x1" and "y1";
     for i in range(0, 2):
-        OPT[i][0] = i*gap_pen
+        OPT[i][0] = i*gap_pen 
 
     for j in range(0, n+1):
         OPT[0][j] = j*gap_pen
 
 
-    # compute value of OPT solution BOTTOM UP; optimal value will be found at OPT[m][n]
+    # compute value of OPT solution BOTTOM UP; the value we want will be found somewhere in the last row (OPT[1], since only 2 rows)
 
     for i in range(1, m+1):  # 1 to m
+        i = (i % 2)
         for j in range(1, n+1):  # 1 to n
             # DOUBLE-CHECK: OVERWRITING PREVIOUS ROW WE DONT NEED ANYORE; MAY NEED TO CHECK THIS; COULD BE WRONG
-            i = (i % 2)
-            # string is indexed by zerp; to access ith character, subtract i-1
+            # string is indexed by zero; to access ith character, subtract i-1
             OPT[i][j] = min((OPT[i-1][j-1] + MISMATCH(X[i-1], Y[j-1])),
                             (OPT[i-1][j] + gap_pen), (OPT[i][j-1] + gap_pen))
-
         # DOUBLE CHECK: REPLACING ROW 1 WITH CONTENTS OF ROW 2 BECAUSE WE DONT NEED ROW 2 ANYMORE
         for k in range(n+1):
             OPT[i-1][k] = OPT[i][k]    
 
-    # DOUBLE CHECK EVERYTHING BELOW:
-
-    # Row 1 should have the minimum cost alignment for the optimal split point
-
-    # minCost = 100000000
-    # minIdx = 0
-    # for i in range(0, n+1):
-    #     if minCost > OPT[1][i]:
-    #         minCost = OPT[1][i]
-    #         minIdx = i
-
-    # return minIdx
+   
     return OPT[1]
 
 
@@ -215,67 +204,61 @@ def basic_seq_align(X, Y, gap_pen):
 
 def divideAndConquer(X, Y, GAP_PEN):
     # base case
-    
-    # try 1
-    # if X == "" and Y == "":
-    #     # print("base case 1? ")
-    #     return "_", "_"
-    # elif X == "":
-    #     # print("base case 2? ")
-    #     return "_", Y
-    # elif Y == "":
-    #     # print("base case 3? ")
-    #     return X, "_"
-    
-    #try 2
-    # if X == "" or Y == "":
-    #     # print("base case 1? ")
-    #     return basic_seq_align(X, Y, GAP_PEN)
-    # elif len(Y) == 1 and len(X) == 1:
-    #     return X, Y
-    
-    #try 3 (from textbook pseudocode)
     if (len(X)<=2 or len(Y)<=2):
         return basic_seq_align(X, Y, GAP_PEN)
     else:
         print("X before split:", X)
         print("Y before split:", Y)
         
-        # split X in half
+        # split X in equal halves
         Xleft = X[:len(X)//2]
         Xright = X[len(X)//2:]
        
     
-        # split Y at optimal split point
+        # Find optimal split point for Y
+        
+        # Find minimum cost alignments between Xleft and "Y1", "Y1Y2", "Y1Y2Y3",...., "Y1Y2Y3..Yk"
+        
         opt_row1 = find_opt_Y_split(Xleft, Y, GAP_PEN)
+        # opt_row1[K] = min cost of alignment between Xleft and "Y1....YK"                                                               
         print(opt_row1)   
+        
+        # Find minimum cost alignments between Xright_reversed and "Yk", "YkYk-1", ...., "Yk...Y3Y2Y1"
         Xright_reversed = Xright[::-1]
         Yreversed = Y[::-1]
+        
+        # opt_row1[n-K] = min cost of alignment between Xright and "YK+1....Yn"
         opt_row2 = find_opt_Y_split(Xright_reversed, Yreversed, GAP_PEN)
         print(opt_row2)
         
+        # Find optimal split point that gives us the smallest cost                                                        
         minCost = 100000000
-        opt_split_pt = 0
+        opt_split_pt = 0                                                             
         for i in range(len(opt_row1)):
+            # To find cost of alignment of splitting Y at split point K, get opt_row1[K] + opt_row[n-K]
+                    # opt_row1[K] = min cost of alignment between Xleft and "Y1....YK"
+                    # opt_row1[n-K] = min cost of alignment between Xright and "YK+1....Yn"
             j = len(opt_row1) - i - 1
             if (minCost > opt_row1[i] + opt_row2[j]):
                 minCost = opt_row1[i] + opt_row2[j]
                 opt_split_pt = i
         
         
+        # Split Y at optimal split point
         Yleft, Yright = Y[:opt_split_pt], Y[opt_split_pt:]
+        
+        # DEBUG: Print out left and right halves of X and Y after splitting
         print("Xleft: ", Xleft)
         print("Yleft: ", Yleft)
-        
         print("Xright: ", Xright)
         print("Yright: ", Yright)
         print("")
-        # print("Yleft:", Yleft)
-        # print("Yright:", Yright)
+     
+        # Recursive calls on both segment halves (left half of X with left half of Y, right half of X with right half of Y)
         X_sol1, Y_sol1 = divideAndConquer(Xleft, Yleft, GAP_PEN)
         X_sol2, Y_sol2 = divideAndConquer(Xright, Yright, GAP_PEN)
+        # Combine Step: Concatenate the Alignments we get from both halves
         return X_sol1 + X_sol2, Y_sol1 + Y_sol2
-    # return divideAndConquer(Xleft,Yleft, GAP_PEN)[0] + divideAndConquer(Xright,Yright, GAP_PEN)[0], divideAndConquer(Xleft,Yleft)[1] + divideAndConquer(Xright,Yright)[1]
 
 
 
@@ -290,7 +273,8 @@ def main():
    
     X = inputSeq[0]
     Y = inputSeq[1]
-   
+    # X = "AAAATCAAAAAAAAAAA"
+    # Y = "ATCG"
     
     print("Original X: ", X)
     print("Original Y: ", Y)
