@@ -1,5 +1,6 @@
 import time
 import tracemalloc
+import sys
 
 # Define meaning of OPT solution:
 # OPT solution is the minimum cost alignment of 2 strings: X = "X1X2X3...Xm" and Y = "Y1Y2Y3...Yn"
@@ -28,7 +29,7 @@ import tracemalloc
 # Compute Values of 2d array OPT (mxn)
 
 #  m___________
-#   |_|_|_|_|S|
+#   |_|_|_|_|S|    <--------This row represents opt cost between Y1....Ym and
 #   |_|_|_|_|_|
 #   |_|_|_|_|_|
 #   |_|_|_|_|_|
@@ -55,9 +56,9 @@ def parseInputfile(fileName):
             first = baseSeq[:int(i) + 1]
             second = baseSeq[int(i) + 1:]
             baseSeq = first + baseSeq + second
-        else: #this is the base sequence
+        else:  # this is the base sequence
             if baseSeq != "":
-                #print(baseSeq)
+                # print(baseSeq)
                 X = baseSeq
             baseSeq = i
 
@@ -82,7 +83,61 @@ def checkMinAlign(X, Y, gap_pen):
         else:
             cost = cost + MISMATCH(X[i-1], Y[i-1])
         i = i - 1
-    return cost       
+    return cost
+
+
+# this gives us the optimal split point (index) of Y
+def find_opt_Y_split(X, Y, gap_pen):
+
+    m = len(X)
+    n = len(Y)
+    print("here:",X)
+    print("here:", Y)
+    # define 2d list OPT
+    OPT = []
+    # DOULE CHECK: INITIALZIED SMALL 2D GRID (2 by m+1)
+    for i in range(2):
+        OPT.append([])
+        for j in range(n+1):
+            OPT[i].append(0)
+
+    # initialize necessary locations of OPT array
+    # special note! in OPT grid, we reserve 0th row/col for "" and ""; the 1st row/col for "x1" and "y1"; the 2nd row/col for "x1x2" and "y1y2"
+    for i in range(0, 2):
+        OPT[i][0] = i*gap_pen
+
+    for j in range(0, n+1):
+        OPT[0][j] = j*gap_pen
+
+
+    # compute value of OPT solution BOTTOM UP; optimal value will be found at OPT[m][n]
+
+    for i in range(1, m+1):  # 1 to m
+        for j in range(1, n+1):  # 1 to n
+            # DOUBLE-CHECK: OVERWRITING PREVIOUS ROW WE DONT NEED ANYORE; MAY NEED TO CHECK THIS; COULD BE WRONG
+            i = (i % 2)
+            # string is indexed by zerp; to access ith character, subtract i-1
+            OPT[i][j] = min((OPT[i-1][j-1] + MISMATCH(X[i-1], Y[j-1])),
+                            (OPT[i-1][j] + gap_pen), (OPT[i][j-1] + gap_pen))
+
+        # DOUBLE CHECK: REPLACING ROW 1 WITH CONTENTS OF ROW 2 BECAUSE WE DONT NEED ROW 2 ANYMORE
+        for k in range(n+1):
+            OPT[i-1][k] = OPT[i][k]    
+
+    # DOUBLE CHECK EVERYTHING BELOW:
+
+    # Row 1 should have the minimum cost alignment for the optimal split point
+
+    # minCost = 100000000
+    # minIdx = 0
+    # for i in range(0, n+1):
+    #     if minCost > OPT[1][i]:
+    #         minCost = OPT[1][i]
+    #         minIdx = i
+
+    # return minIdx
+    return OPT[1]
+
 
 def basic_seq_align(X, Y, gap_pen):
 
@@ -94,7 +149,7 @@ def basic_seq_align(X, Y, gap_pen):
         OPT.append([])
         for j in range(n+1):
             OPT[i].append(0)
-   
+
     # initialize necessary locations of OPT array
     # special note! in OPT grid, we reserve 0th row/col for "" and ""; the 1st row/col for "x1" and "y1"; the 2nd row/col for "x1x2" and "y1y2"
     for i in range(0, m+1):
@@ -105,8 +160,8 @@ def basic_seq_align(X, Y, gap_pen):
 
     # compute value of OPT solution BOTTOM UP; optimal value will be found at OPT[m][n]
 
-    for i in range(1, m+1): # 1 to m
-        for j in range(1, n+1): # 1 to n 
+    for i in range(1, m+1):  # 1 to m
+        for j in range(1, n+1):  # 1 to n
             # string is indexed by zerp; to access ith character, subtract i-1
             OPT[i][j] = min((OPT[i-1][j-1] + MISMATCH(X[i-1], Y[j-1])),
                             (OPT[i-1][j] + gap_pen), (OPT[i][j-1] + gap_pen))
@@ -142,7 +197,7 @@ def basic_seq_align(X, Y, gap_pen):
             j = j - 1
             # print("X: ", X_sol)
             # print("Y: ", Y_sol)
-    
+
     while (i > 0):
         X_sol = X[i-1] + X_sol
         Y_sol = '_' + Y_sol
@@ -151,37 +206,122 @@ def basic_seq_align(X, Y, gap_pen):
         Y_sol = Y[j-1] + Y_sol
         X_sol = '_' + X_sol
         j = j - 1
-    
-    
-    
-    print("X: ", X_sol)
-    print("Y: ", Y_sol)
+
+    # print("X: ", X_sol)
+    # print("Y: ", Y_sol)
     return X_sol, Y_sol
+
+
+
+def divideAndConquer(X, Y, GAP_PEN):
+    # base case
     
+    # try 1
+    # if X == "" and Y == "":
+    #     # print("base case 1? ")
+    #     return "_", "_"
+    # elif X == "":
+    #     # print("base case 2? ")
+    #     return "_", Y
+    # elif Y == "":
+    #     # print("base case 3? ")
+    #     return X, "_"
     
+    #try 2
+    # if X == "" or Y == "":
+    #     # print("base case 1? ")
+    #     return basic_seq_align(X, Y, GAP_PEN)
+    # elif len(Y) == 1 and len(X) == 1:
+    #     return X, Y
+    
+    #try 3 (from textbook pseudocode)
+    if (len(X)<=2 or len(Y)<=2):
+        return basic_seq_align(X, Y, GAP_PEN)
+    else:
+        print("X before split:", X)
+        print("Y before split:", Y)
+        
+        # split X in half
+        Xleft = X[:len(X)//2]
+        Xright = X[len(X)//2:]
+       
+    
+        # split Y at optimal split point
+        opt_row1 = find_opt_Y_split(Xleft, Y, GAP_PEN)
+        print(opt_row1)   
+        Xright_reversed = Xright[::-1]
+        Yreversed = Y[::-1]
+        opt_row2 = find_opt_Y_split(Xright_reversed, Yreversed, GAP_PEN)
+        print(opt_row2)
+        
+        minCost = 100000000
+        opt_split_pt = 0
+        for i in range(len(opt_row1)):
+            j = len(opt_row1) - i - 1
+            if (minCost > opt_row1[i] + opt_row2[j]):
+                minCost = opt_row1[i] + opt_row2[j]
+                opt_split_pt = i
+        
+        
+        Yleft, Yright = Y[:opt_split_pt], Y[opt_split_pt:]
+        print("Xleft: ", Xleft)
+        print("Yleft: ", Yleft)
+        
+        print("Xright: ", Xright)
+        print("Yright: ", Yright)
+        print("")
+        # print("Yleft:", Yleft)
+        # print("Yright:", Yright)
+        X_sol1, Y_sol1 = divideAndConquer(Xleft, Yleft, GAP_PEN)
+        X_sol2, Y_sol2 = divideAndConquer(Xright, Yright, GAP_PEN)
+        return X_sol1 + X_sol2, Y_sol1 + Y_sol2
+    # return divideAndConquer(Xleft,Yleft, GAP_PEN)[0] + divideAndConquer(Xright,Yright, GAP_PEN)[0], divideAndConquer(Xleft,Yleft)[1] + divideAndConquer(Xright,Yright)[1]
+
+
+
 
 def main():
 
     t0 = time.time()
     tracemalloc.start()
 
-    inputSeq = parseInputfile("input2.txt")
-    print(inputSeq[0])
-    print(inputSeq[1])
-
+    filename = sys.argv[1]
+    inputSeq = parseInputfile(filename)
+   
     X = inputSeq[0]
     Y = inputSeq[1]
+   
+    
+    print("Original X: ", X)
+    print("Original Y: ", Y)
+    
+    # DIVIDE AND CONQUER
+
+    # Conquer (This step requires DP!!!): Find the optimal alignment between 1) left segments (X1 and Y1),  and 2) right segments (X2 and Y2)
+    # Combine: Concatenate the two optimal alignments found above
+
+    # What is base case? one of the segment's length == 0
+    # Then you just add gaps to match the other segment
+
+    # For conquer step above, we need to use DP to find the optimal split point for Y (to cut into Y1 and Y2)
+
+    # X="ACACACTGACTACTGACTGGTGACTACTGACTGGACTGACTACTGACTGGTGACTACTGACTGG"
+
+    # Y="TATTATTATACGCTATTATACGCGACGCGGACGCGTATACGCTATTATACGCGACGCGGACGCG"
 
     
-    #X="ACACACTGACTACTGACTGGTGACTACTGACTGGACTGACTACTGACTGGTGACTACTGACTGG"
-
-    #Y="TATTATTATACGCTATTATACGCGACGCGGACGCGTATACGCTATTATACGCGACGCGGACGCG"
     
-
     gap_pen = 30
+
+    # start timer and memory
+    X_sol, Y_sol = divideAndConquer(X, Y, gap_pen)
+
+    X_sol1 , Y_sol2 = basic_seq_align(X, Y, gap_pen)
+    print("          Correct  X Allignment: ", X_sol1)
+    print("          Correct  Y Allignment: ", Y_sol2)
     
-    #start timer and memory 
-    X_sol, Y_sol = basic_seq_align(X, Y, gap_pen)
+    print("Our current Memory X Allignment: ", X_sol)
+    print("Our current Memory Y Allignment: ", Y_sol)
     t1 = time.time()
     totalTime = t1-t0
     snapshot = tracemalloc.take_snapshot()
@@ -193,11 +333,10 @@ def main():
         total += stat.size
     print(total)
     print("total time ", totalTime, " seconds")
-    print("cost of alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
-
+    print("cost of correct alignment: ", checkMinAlign(X_sol1, Y_sol2, gap_pen))
+    print("cost of our memory  alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
 
 
 if __name__ == "__main__":
 
     main()
-   
