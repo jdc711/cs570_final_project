@@ -113,16 +113,27 @@ def find_opt_Y_split(X, Y, gap_pen):
 
     # compute value of OPT solution BOTTOM UP; the value we want will be found somewhere in the last row (OPT[1], since only 2 rows)
 
+    # for i in range(1, m+1):  # 1 to m
+    #     i = (i % 2)
+    #     for j in range(1, n+1):  # 1 to n
+    #         # DOUBLE-CHECK: OVERWRITING PREVIOUS ROW WE DONT NEED ANYORE; MAY NEED TO CHECK THIS; COULD BE WRONG
+    #         # string is indexed by zero; to access ith character, subtract i-1
+    #         OPT[i][j] = min((OPT[i-1][j-1] + MISMATCH(X[i-1], Y[j-1])),
+    #                         (OPT[i-1][j] + gap_pen), (OPT[i][j-1] + gap_pen))
+    #     # DOUBLE CHECK: REPLACING ROW 1 WITH CONTENTS OF ROW 2 BECAUSE WE DONT NEED ROW 2 ANYMORE
+    #     for k in range(n+1):
+    #         OPT[i-1][k] = OPT[i][k]   
+    
     for i in range(1, m+1):  # 1 to m
-        i = (i % 2)
+        OPT[1][0] = i*gap_pen
         for j in range(1, n+1):  # 1 to n
             # DOUBLE-CHECK: OVERWRITING PREVIOUS ROW WE DONT NEED ANYORE; MAY NEED TO CHECK THIS; COULD BE WRONG
             # string is indexed by zero; to access ith character, subtract i-1
-            OPT[i][j] = min((OPT[i-1][j-1] + MISMATCH(X[i-1], Y[j-1])),
-                            (OPT[i-1][j] + gap_pen), (OPT[i][j-1] + gap_pen))
+            OPT[1][j] = min((OPT[0][j-1] + MISMATCH(X[i-1], Y[j-1])),
+                            (OPT[0][j] + gap_pen), (OPT[1][j-1] + gap_pen))
         # DOUBLE CHECK: REPLACING ROW 1 WITH CONTENTS OF ROW 2 BECAUSE WE DONT NEED ROW 2 ANYMORE
         for k in range(n+1):
-            OPT[i-1][k] = OPT[i][k]    
+            OPT[0][k] = OPT[1][k] 
 
    
     return OPT[1]
@@ -273,8 +284,8 @@ def main():
    
     X = inputSeq[0]
     Y = inputSeq[1]
-    # X = "AAAATCAAAAAAAAAAA"
-    # Y = "ATCG"
+    # X = "ATCGATCGATCGATCG"
+    # Y = "ATCGATCGATCGATCG"
     
     print("Original X: ", X)
     print("Original Y: ", Y)
