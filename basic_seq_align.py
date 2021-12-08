@@ -156,8 +156,9 @@ def basic_seq_align(X, Y, gap_pen):
     
     
     
-    print("X: ", X_sol)
-    print("Y: ", Y_sol)
+    
+    #print("X: ", X_sol)
+    #print("Y: ", Y_sol)
     return X_sol, Y_sol
     
 
@@ -194,10 +195,33 @@ def main():
     mem_after = process_memory()
     t1 = time.time()
     totalTime = t1-t0
+
+    if(len(X_sol) >= 50):
+        X_sol_start = X_sol[ 0 : 50 ]
+        X_sol_end = X_sol[-50:]
+    else:
+        X_sol_start = X_sol
+        X_sol_end = X_sol
+    if(len(Y_sol) >= 50):
+        Y_sol_start = Y_sol[ 0 : 50 ]
+        Y_sol_end = Y_sol[-50:]
+    else:
+        Y_sol_start = Y_sol
+        Y_sol_end = Y_sol
+
+    #X_sol1 , Y_sol2 = basic_seq_align(X, Y, gap_pen)
+
+    f = open("output.txt", "w")
+    f.write(X_sol_start + " " + X_sol_end + "\n")
+    f.write(Y_sol_start + " " + Y_sol_end +  "\n")
+    f.write(str(checkMinAlign(X_sol, Y_sol, gap_pen) / 1.0) + "\n" )
+    f.write(str(totalTime) + "\n")
+    f.write(str(mem_after-mem_before) + "\n")
+    f.close()
     
-    print("memory", mem_after - mem_before)
-    print("total time ", totalTime, " seconds")
-    print("cost of alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
+    #print("memory", mem_after - mem_before)
+    #print("total time ", totalTime, " seconds")
+    #print("cost of alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
 
 
 

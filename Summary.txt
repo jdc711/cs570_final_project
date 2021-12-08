@@ -1,0 +1,8 @@
+Summarize your results and include any insights or observations.
+In summary, we noted that the memory efficient version of the algorithm (as expected) used less memory than the basic implementation of sequence alignment. When we used a memory profiler to get an estimation of the RAM used for both versions, we discovered that the memory efficient version uses anywhere from around 2 to 10 times less memory than the standard version. This was an expected result, as we expected the memory efficient verison to have a memory complexity of O(m+n) while we expected the standard version to have a complexity of O(mn).
+We also noted that the memory efficient version of the algorithm ran slower than the basic version by a factor of around two. This was not surprising given that both versions of the algorithm run with the time complexity of O(mn)
+
+F. You also need to state each group members contribution to the project, e.g.coding, testing, report preparation
+Haemin Lee: 
+Joshua Choe
+Derrick Kim: 

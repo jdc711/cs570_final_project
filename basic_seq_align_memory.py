@@ -276,7 +276,7 @@ def divideAndConquer(X, Y, GAP_PEN):
 def process_memory():
     process = psutil.Process()
     mem_info = process.memory_info()
-    mem = mem_info.rss/(1024)
+    mem = mem_info.rss/(1024.0)
     return mem
 
 def main():
@@ -317,12 +317,31 @@ def main():
     mem_before = process_memory()
     X_sol, Y_sol = divideAndConquer(X, Y, gap_pen)
     mem_after = process_memory()
-
-    print("MEMORY", mem_after - mem_before)
     t1 = time.time()
     totalTime = t1-t0
 
-    X_sol1 , Y_sol2 = basic_seq_align(X, Y, gap_pen)
+    if(len(X_sol) >= 50):
+        X_sol_start = X_sol[ 0 : 50 ]
+        X_sol_end = X_sol[-50:]
+    else:
+        X_sol_start = X_sol
+        X_sol_end = X_sol
+    if(len(Y_sol) >= 50):
+        Y_sol_start = Y_sol[ 0 : 50 ]
+        Y_sol_end = Y_sol[-50:]
+    else:
+        Y_sol_start = Y_sol
+        Y_sol_end = Y_sol
+
+    #X_sol1 , Y_sol2 = basic_seq_align(X, Y, gap_pen)
+
+    f = open("output.txt", "w")
+    f.write(X_sol_start + " " + X_sol_end + "\n")
+    f.write(Y_sol_start + " " + Y_sol_end +  "\n")
+    f.write(str(checkMinAlign(X_sol, Y_sol, gap_pen) / 1.0) + "\n" )
+    f.write(str(totalTime) + "\n")
+    f.write(str(mem_after-mem_before) + "\n")
+    f.close()
     #print("          Correct  X Allignment: ", X_sol1)
     #print("          Correct  Y Allignment: ", Y_sol2)
     
@@ -330,9 +349,9 @@ def main():
     #print("Our current Memory Y Allignment: ", Y_sol)
 
     
-    print("total time ", totalTime, " seconds")
-    print("cost of correct alignment: ", checkMinAlign(X_sol1, Y_sol2, gap_pen))
-    print("cost of our memory  alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
+    #print("total time ", totalTime, " seconds")
+    #print("cost of correct alignment: ", checkMinAlign(X_sol1, Y_sol2, gap_pen))
+    #print("cost of our memory  alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
 
 
 if __name__ == "__main__":
