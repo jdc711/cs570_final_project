@@ -1,5 +1,7 @@
 import time
 import tracemalloc
+import psutil
+import sys
 
 # Define meaning of OPT solution:
 # OPT solution is the minimum cost alignment of 2 strings: X = "X1X2X3...Xm" and Y = "Y1Y2Y3...Yn"
@@ -158,16 +160,21 @@ def basic_seq_align(X, Y, gap_pen):
     print("Y: ", Y_sol)
     return X_sol, Y_sol
     
-    
+
+
+def process_memory():
+    process = psutil.Process()
+    mem_info = process.memory_info()
+    mem = mem_info.rss/(1024)
+    return mem
 
 def main():
 
-    t0 = time.time()
-    tracemalloc.start()
-
-    inputSeq = parseInputfile("input2.txt")
-    print(inputSeq[0])
-    print(inputSeq[1])
+    
+    filename = sys.argv[1]
+    inputSeq = parseInputfile(filename)
+    #print(inputSeq[0])
+    #print(inputSeq[1])
 
     X = inputSeq[0]
     Y = inputSeq[1]
@@ -181,17 +188,14 @@ def main():
     gap_pen = 30
     
     #start timer and memory 
+    t0 = time.time()
+    mem_before = process_memory()
     X_sol, Y_sol = basic_seq_align(X, Y, gap_pen)
+    mem_after = process_memory()
     t1 = time.time()
     totalTime = t1-t0
-    snapshot = tracemalloc.take_snapshot()
-    top_stats = snapshot.statistics('lineno')
-
-    total = 0
-    for stat in top_stats:
-        print(stat)
-        total += stat.size
-    print(total)
+    
+    print("memory", mem_after - mem_before)
     print("total time ", totalTime, " seconds")
     print("cost of alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
 

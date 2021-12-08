@@ -1,6 +1,7 @@
 import time
 import tracemalloc
 import sys
+import psutil
 
 # Define meaning of OPT solution:
 # OPT solution is the minimum cost alignment of 2 strings: X = "X1X2X3...Xm" and Y = "Y1Y2Y3...Yn"
@@ -91,8 +92,8 @@ def find_opt_Y_split(X, Y, gap_pen):
 
     m = len(X)
     n = len(Y)
-    print("X in OPT SPLIT:",X)
-    print("Finding OPT SPLIT For Y:", Y)
+    #print("X in OPT SPLIT:",X)
+    #print("Finding OPT SPLIT For Y:", Y)
     
     # define 2d list OPT
     OPT = []
@@ -218,8 +219,8 @@ def divideAndConquer(X, Y, GAP_PEN):
     if (len(X)<=2 or len(Y)<=2):
         return basic_seq_align(X, Y, GAP_PEN)
     else:
-        print("X before split:", X)
-        print("Y before split:", Y)
+        #print("X before split:", X)
+        #print("Y before split:", Y)
         
         # split X in equal halves
         Xleft = X[:len(X)//2]
@@ -232,7 +233,7 @@ def divideAndConquer(X, Y, GAP_PEN):
         
         opt_row1 = find_opt_Y_split(Xleft, Y, GAP_PEN)
         # opt_row1[K] = min cost of alignment between Xleft and "Y1....YK"                                                               
-        print(opt_row1)   
+        #print(opt_row1)   
         
         # Find minimum cost alignments between Xright_reversed and "Yk", "YkYk-1", ...., "Yk...Y3Y2Y1"
         Xright_reversed = Xright[::-1]
@@ -240,7 +241,7 @@ def divideAndConquer(X, Y, GAP_PEN):
         
         # opt_row1[n-K] = min cost of alignment between Xright and "YK+1....Yn"
         opt_row2 = find_opt_Y_split(Xright_reversed, Yreversed, GAP_PEN)
-        print(opt_row2)
+        #print(opt_row2)
         
         # Find optimal split point that gives us the smallest cost                                                        
         minCost = 100000000
@@ -259,11 +260,11 @@ def divideAndConquer(X, Y, GAP_PEN):
         Yleft, Yright = Y[:opt_split_pt], Y[opt_split_pt:]
         
         # DEBUG: Print out left and right halves of X and Y after splitting
-        print("Xleft: ", Xleft)
-        print("Yleft: ", Yleft)
-        print("Xright: ", Xright)
-        print("Yright: ", Yright)
-        print("")
+       # print("Xleft: ", Xleft)
+        #print("Yleft: ", Yleft)
+        #print("Xright: ", Xright)
+        #print("Yright: ", Yright)
+        #print("")
      
         # Recursive calls on both segment halves (left half of X with left half of Y, right half of X with right half of Y)
         X_sol1, Y_sol1 = divideAndConquer(Xleft, Yleft, GAP_PEN)
@@ -272,12 +273,15 @@ def divideAndConquer(X, Y, GAP_PEN):
         return X_sol1 + X_sol2, Y_sol1 + Y_sol2
 
 
-
+def process_memory():
+    process = psutil.Process()
+    mem_info = process.memory_info()
+    mem = mem_info.rss/(1024)
+    return mem
 
 def main():
 
-    t0 = time.time()
-    tracemalloc.start()
+   
 
     filename = sys.argv[1]
     inputSeq = parseInputfile(filename)
@@ -287,8 +291,8 @@ def main():
     # X = "ATCGATCGATCGATCG"
     # Y = "ATCGATCGATCGATCG"
     
-    print("Original X: ", X)
-    print("Original Y: ", Y)
+    #print("Original X: ", X)
+    #print("Original Y: ", Y)
     
     # DIVIDE AND CONQUER
 
@@ -309,24 +313,23 @@ def main():
     gap_pen = 30
 
     # start timer and memory
+    t0 = time.time()
+    mem_before = process_memory()
     X_sol, Y_sol = divideAndConquer(X, Y, gap_pen)
+    mem_after = process_memory()
 
-    X_sol1 , Y_sol2 = basic_seq_align(X, Y, gap_pen)
-    print("          Correct  X Allignment: ", X_sol1)
-    print("          Correct  Y Allignment: ", Y_sol2)
-    
-    print("Our current Memory X Allignment: ", X_sol)
-    print("Our current Memory Y Allignment: ", Y_sol)
+    print("MEMORY", mem_after - mem_before)
     t1 = time.time()
     totalTime = t1-t0
-    snapshot = tracemalloc.take_snapshot()
-    top_stats = snapshot.statistics('lineno')
 
-    total = 0
-    for stat in top_stats:
-        print(stat)
-        total += stat.size
-    print(total)
+    X_sol1 , Y_sol2 = basic_seq_align(X, Y, gap_pen)
+    #print("          Correct  X Allignment: ", X_sol1)
+    #print("          Correct  Y Allignment: ", Y_sol2)
+    
+    #print("Our current Memory X Allignment: ", X_sol)
+    #print("Our current Memory Y Allignment: ", Y_sol)
+
+    
     print("total time ", totalTime, " seconds")
     print("cost of correct alignment: ", checkMinAlign(X_sol1, Y_sol2, gap_pen))
     print("cost of our memory  alignment: ", checkMinAlign(X_sol, Y_sol, gap_pen))
