@@ -195,6 +195,7 @@ def main():
     mem_after = process_memory()
     t1 = time.time()
     totalTime = t1-t0
+    print("Lenght of m+n", len(X_sol+Y_sol))
 
     if(len(X_sol) >= 50):
         X_sol_start = X_sol[ 0 : 50 ]
